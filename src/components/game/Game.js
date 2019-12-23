@@ -27,16 +27,26 @@ class Game extends Component {
         this.setState({
             board,
             snake,
-            direction: KEYS.right
+            direction: KEYS.down
         }, () => this.frame());
     }
     frame() {
-        this.getNextIndex(44, KEYS.up)
+        const { snake, board, direction} = this.state;
+        const head = this.getNextIndex(snake[0], direction);
+        board[head] = BODY;
+        snake.unshift(head);
+        board[snake.pop()] = null;
+
+        this.setState({
+            board,
+            snake
+        }, () => {
+            setTimeout(this.frame, 200);
+        })
     }
     getNextIndex(head, direction) {
         let x  = head % COLS;
         let y = Math.floor( head / COLS );
-        console.log(x, y);
         switch (direction) {
             case KEYS.up: y = y <= 0 ? 
             ROWS -1 : y -1; break;
@@ -44,15 +54,16 @@ class Game extends Component {
             0 : y + 1; break;
             case KEYS.left: x = x <= 0 ?
             COLS - 1 : x - 1; break;
-            case KEYS.right: x = x >= COLS ?
+            case KEYS.right: x = x >= COLS - 1 ?
             0 : x + 1; break;
             default: return;
         }
-        console.log(x, y);
+        return (COLS * y) + x 
 
     }
     render() {
-        return( <Cells/>)
+        const {board} =  this.state;
+        return( <Cells board={board}/>)
     }
 }
 

@@ -1,11 +1,15 @@
 import React from 'react';
-import { ROWS, COLS, CELL, BODY } from '../const';
+import { ROWS, COLS, CELL, BODY, FOOD } from '../const';
 
-const Cells = () => {
+const Cells = ({board}) => {
     const cells = [];
     for(let row = 0; row < ROWS; row++){
         for(let col = 0; col < COLS; col++) {
-            cells.push(<div className={'cell'}/>)
+            const key = COLS * row + col;
+            const value = board[COLS * row + col];
+            const className = value == BODY ? 'body-cell' :
+            value === FOOD ? 'food-cell' : 'cell';
+            cells.push(<div key={key}className={className}/>)
         }
     }
     return( 
