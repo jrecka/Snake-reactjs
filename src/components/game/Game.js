@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Cells from '../cells/Cells';
-import {START, BODY, FOOD, KEYS, COLS, ROWS} from '../const';
+import {START, BODY, FOOD, KEYS, COLS, ROWS, DIRS} from '../const';
 import '../../style/style.css';
 class Game extends Component {
     constructor(props) {
@@ -13,6 +13,8 @@ class Game extends Component {
         };
         this.start = this.start.bind(this);
         this.frame = this.frame.bind(this);
+        this.handleKey = this.handleKey.bind(this);
+
     }
     componentDidMount() {
         this.start();
@@ -31,18 +33,45 @@ class Game extends Component {
         }, () => this.frame());
     }
     frame() {
-        const { snake, board, direction} = this.state;
+        let { snake, board, direction} = this.state;
         const head = this.getNextIndex(snake[0], direction);
+        const food = board[head] === FOOD || 
+        snake.length === 1;
+        
+        if(food) {
+            const maxCells = ROWS * COLS;
+            let i;
+            do{
+                i = Math.floor(Math.random() * maxCells);
+            }
+            while(board[i])
+            board[i] = FOOD;
+        } else {
+            board[snake.pop()] = null;
+        }
         board[head] = BODY;
         snake.unshift(head);
-        board[snake.pop()] = null;
+
+        if(this.nextDirection) {
+            direction = this.nextDirection;
+            this.nextDirection = null;
+        }
 
         this.setState({
             board,
-            snake
+            snake, 
+            direction
         }, () => {
             setTimeout(this.frame, 200);
         })
+    }
+    handleKey(event){
+        const direction  = event.nativeEvent.keyCode;
+        console.log(direction);
+        const diff = Math.abs(this.state.direction - direction);
+        if(DIRS[direction] && diff !== 0 && diff !== 2) {
+            this.nextDirection = direction;
+        }
     }
     getNextIndex(head, direction) {
         let x  = head % COLS;
@@ -63,7 +92,9 @@ class Game extends Component {
     }
     render() {
         const {board} =  this.state;
-        return( <Cells board={board}/>)
+        return( <Cells board={board}
+            handleKey={this.handleKey}
+                    />)
     }
 }
 
